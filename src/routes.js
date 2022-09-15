@@ -1,8 +1,7 @@
 import { createWebHistory, createRouter } from 'vue-router'
 const ProjectPage = () => import('./components/ProjectPage.vue');
 const AddProject = () => import('./components/AddProject.vue');
-const CompletedProjects = () => import('./components/CompletedProjects.vue');
-const OngoingProjects = () => import('./components/OngoingProjects.vue');
+const NotFound = () => import('./components/NotFound.vue');
 
 const routes = [
     {
@@ -11,21 +10,21 @@ const routes = [
         component: ProjectPage
     },
     {
-        name: 'AddProject',
         path: '/add-project',
         component: AddProject,
     },
     {
-        name: 'CompletedProjects',
-        path: '/completed-projects',
-        component: CompletedProjects,
+        name:'AddProject',
+        path: '/edit-project/:id',
+        component : AddProject,
+        props: true,
     },
     {
-        name: 'OngoingProjects',
-        path: '/ongoing-projects',
-        component: OngoingProjects,
-    },
-   
+        name: 'NotFound',
+        path: '/:pathMatch(.*)*',
+        component: NotFound
+    }
+    
 ];
 
 const router = createRouter({
