@@ -8,8 +8,8 @@
         <label for="project-details">DETAILS</label>
         <textarea name="" id="project-details" cols="30" rows="10" v-model="detail"></textarea>
     </div>
-    <button @click="addProject" class="btn" v-if="!this.id">Add Project</button>
-    <button @click="updateProject" class="btn" v-if="this.id">Update Project</button>
+    <router-link to="/" class="nav-menu "><button @click="addProject" class="btn" v-if="!this.id" :disabled="title.length === 0 || detail.length === 0">Add Project</button></router-link>
+    <router-link to="/" class="nav-menu "><button @click="updateProject" class="btn" v-if="this.id" :disabled="title.length === 0 || detail.length === 0">Update Project</button></router-link>
 </div>
 </template>
 
@@ -24,38 +24,35 @@ export default {
             title: "",
             detail: "",
             project: [],
-            projectTemp: [],
         };
     },
 
     methods: {
         addProject() {
-            this.project.push({
-                'title': this.title,
-                'detail': this.detail,
-                'completed': false,
-                'ongoing': true
-            })
-            localStorage.setItem("project", JSON.stringify(this.project));
-            // console.log(this.project);
-            this.title = "";
-            this.detail = "";
+                this.project.push({
+                    'title': this.title,
+                    'detail': this.detail,
+                    'completed': false,
+                })
+                localStorage.setItem("projects", JSON.stringify(this.project));
+                this.title = "";
+                this.detail = "";
         },
         updateProject() {
             this.project[this.id].title = this.title;
             this.project[this.id].detail = this.detail;
-            localStorage.setItem("project", JSON.stringify(this.project));
+            localStorage.setItem("projects", JSON.stringify(this.project));
             this.title = "";
             this.detail = "";
         }
     },
     created() {
-        this.project = JSON.parse(localStorage.getItem('project') || "[]");
+        this.project = JSON.parse(localStorage.getItem('projects') || "[]");
         if (this.id) {
             this.title = this.project[this.id].title;
             this.detail = this.project[this.id].detail;
         }
-    }
+    },
 }
 </script>
 
@@ -112,5 +109,15 @@ textarea {
     border-radius: 10px;
     border: none;
     font-size: 1em;
+    cursor: pointer;
+}
+
+#incomplete-warning{
+    color: magenta;
+}
+
+:disabled{
+    opacity: .6;
+    cursor:not-allowed;
 }
 </style>

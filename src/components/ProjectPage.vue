@@ -1,6 +1,6 @@
 <template>
 <div class="filter-nav">
-    <button class="filter" @click="applyFilterViewAll">VIEW ALL</button>
+    <button class="filter"  @click="applyFilterViewAll">VIEW ALL</button>
     <button class="filter" @click="applyFilterCompleted">COMPLETED</button>
     <button class="filter" @click="applyFilterOngoing">ONGOING</button>
 </div>
@@ -11,15 +11,11 @@
             <p>No project added </p>
             <p>Click to add a new project</p>
         </div>
-
     </router-link>
 </div>
-<!-- "VIEW ALL" section: shows all projects   -->
-
-<div v-if="filter.viewAll">
     <ul>
-        <li v-for="(element,index) in projects" v-bind:key="index" class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : element.ongoing}">
-            <span class="project-title">{{element.title}}</span>
+        <li v-for="(element,index) in filteredProjects" v-bind:key="index" class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : !element.completed}">
+            <span class="project-title">{{index}} {{element.title}}</span>
             <span class="icons">
                 <!-- delete icon  -->
                 <i class="fa-solid fa-trash" :key="index" :id="index" @click="deleteProject(index)"></i>
@@ -32,47 +28,7 @@
             <!-- </div> -->
         </li>
     </ul>
-</div>
 
-<!-- "COMPLETED" section : shows all completed projects  -->
-
-<div v-if="filter.completed">
-    <ul>
-        <div v-for="(element,index) in projects" v-bind:key="index">
-            <div v-if="element.completed === true">
-                <li class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : element.ongoing}">
-                    <span class="project-title">{{element.title}}</span>
-                    <span class="icons">
-                        <i class="fa-solid fa-trash" :key="index" :id="index" @click="deleteProject(index)"></i>
-                        <i class="fa-solid fa-pencil" @click="editProject(index)"></i>
-                        <i class="fa-solid fa-check green" @click="completedProject(index)" :class="{'green-color': element.completed}"></i>
-                    </span>
-                    <p class="project-detail" :key="index" v-if="showDetailsIndex === index">{{element.detail}}</p>
-                </li>
-            </div>
-        </div>
-    </ul>
-</div>
-
-<!-- "ONGOING" section : shows all ongoing projects  -->
-
-<div v-if="filter.ongoing">
-    <ul>
-        <div v-for="(element,index) in projects" v-bind:key="index">
-            <div v-if="element.ongoing === true">
-                <li class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : element.ongoing}">
-                    <span class="project-title">{{element.title}}</span>
-                    <span class="icons">
-                        <i class="fa-solid fa-trash" :key="index" :id="index" @click="deleteProject(index)"></i>
-                        <i class="fa-solid fa-pencil" @click="editProject(index)"></i>
-                        <i class="fa-solid fa-check" @click="completedProject(index)" :class="{'green-color': element.completed}"></i>
-                    </span>
-                    <p class="project-detail" :key="index" v-if="showDetailsIndex === index">{{element.detail}}</p>
-                </li>
-            </div>
-        </div>
-    </ul>
-</div>
 </template>
 
 <script>
@@ -85,34 +41,43 @@ export default {
             filter: {
                 viewAll: true,
                 completed: false,
-                ongoing: false,
+                ongoing:false,
             }
         }
     },
     methods: {
         applyFilterViewAll() {
+            this.filter.completed = false;
             this.filter.viewAll = true;
-            this.filter.completed = this.filter.ongoing = false;
+            this.filter.ongoing = false;
         },
         applyFilterCompleted() {
             this.filter.completed = true;
-            this.filter.viewAll = this.filter.ongoing = false;
+            this.filter.viewAll = false;
+            this.filter.ongoing =  false
         },
         applyFilterOngoing() {
+            this.filter.completed = false;
+            this.filter.viewAll = false;
             this.filter.ongoing = true;
-            this.filter.viewAll = this.filter.completed = false;
         },
 
         showDetails(index) {
-            if (this.showDetailsIndex != "") {
-                this.showDetailsIndex = index;
-            } else {
-                this.showDetailsIndex = "";
+            console.log(index);
+                if (!this.showDetailsIndex) {
+                    if(this.showDetailsIndex === 0){
+                        this.showDetailsIndex = false;
+                    }
+                    this.showDetailsIndex = index;
+            }else {
+                this.showDetailsIndex = false;
             }
+            console.log("index"+ this.showDetailsIndex);
         },
+
         deleteProject(index) {
             this.projects.splice(index, 1);
-            localStorage.setItem("project", JSON.stringify(this.projects));
+            localStorage.setItem("projects", JSON.stringify(this.projects));
         },
 
         editProject(index) {
@@ -128,13 +93,26 @@ export default {
                 this.projects[index].completed = false;
                 this.projects[index].ongoing = true;
             }
-            localStorage.setItem("project", JSON.stringify(this.projects));
+            localStorage.setItem("projects", JSON.stringify(this.projects));
         }
     },
     created() {
-        this.projects = JSON.parse(localStorage.getItem('project') || "[]");
+        this.projects = JSON.parse(localStorage.getItem('projects') || "[]");
         // console.log(typeof (this.projects));
     },
+    computed: {
+        filteredProjects() {
+            if(this.filter.completed){
+                return this.projects.filter(project => project.completed)
+            }
+            if(this.filter.ongoing){
+                return this.projects.filter(project => !project.completed)
+            }
+            else{
+               return this.projects.filter(project => project)           
+           }
+        }
+    }
 }
 </script>
 
@@ -161,21 +139,21 @@ export default {
     list-style: none;
     background-color: white;
     color: midnightblue;
-    padding: 30px 30px;
+    padding: 24px 30px;
     margin: 10px 50px;
 }
 
 .project-title {
     font-weight: 600;
-    font-size: 1.1em;
+    font-size: 1.16em;
     margin-bottom: 15px;
 }
 
 .project-detail {
     font-size: 1.07em;
-    margin-top: 10px;
+    margin-top: 8px;
     color: black;
-
+    margin-left: 1px;
 }
 
 .icons {
