@@ -8,8 +8,8 @@
         <label for="project-details">DETAILS</label>
         <textarea name="" id="project-details" cols="30" rows="10" v-model="detail"></textarea>
     </div>
-    <router-link to="/" class="nav-menu "><button @click="addProject" class="btn" v-if="!this.id" :disabled="title.length === 0 || detail.length === 0">Add Project</button></router-link>
-    <router-link to="/" class="nav-menu "><button @click="updateProject" class="btn" v-if="this.id" :disabled="title.length === 0 || detail.length === 0">Update Project</button></router-link>
+    <button @click="addProject" class="btn" v-if="!this.id" :disabled="title.length === 0 || detail.length === 0">Add Project</button>
+    <button @click="updateProject" class="btn" v-if="this.id" :disabled="title.length === 0 || detail.length === 0">Update Project</button>
 </div>
 </template>
 
@@ -23,40 +23,41 @@ export default {
         return {
             title: "",
             detail: "",
-            project: [],
+            projects: [],
         };
     },
 
     methods: {
         addProject() {
-                this.project.push({
+                this.projects.push({
                     'title': this.title,
                     'detail': this.detail,
                     'completed': false,
                 })
-                localStorage.setItem("projects", JSON.stringify(this.project));
+                localStorage.setItem("projects", JSON.stringify(this.projects));
                 this.title = "";
                 this.detail = "";
+                this.$router.push({path:'/'})
         },
         updateProject() {
-            this.project[this.id].title = this.title;
-            this.project[this.id].detail = this.detail;
-            localStorage.setItem("projects", JSON.stringify(this.project));
+            this.projects[this.id].title = this.title;
+            this.projects[this.id].detail = this.detail;
+            localStorage.setItem("projects", JSON.stringify(this.projects));
             this.title = "";
             this.detail = "";
+            this.$router.push('/')
         }
     },
     created() {
-        this.project = JSON.parse(localStorage.getItem('projects') || "[]");
+        this.projects = JSON.parse(localStorage.getItem('projects') || "[]");
         if (this.id) {
-            this.title = this.project[this.id].title;
-            this.detail = this.project[this.id].detail;
+            this.title = this.projects[this.id].title;
+            this.detail = this.projects[this.id].detail;
         }
     },
 }
 </script>
-
-    
+   
 <style>
 #add-project-container {
     margin: 3% 10%;
@@ -78,7 +79,7 @@ label {
 
 input {
     border: none;
-    border-bottom: 1px solid lightgrey;
+    border-bottom: 1px solid rgb(187, 187, 187);
     width: 100%;
     padding: 10px;
     margin-left: 10px;
@@ -94,7 +95,7 @@ textarea:focus {
 
 textarea {
     width: 100%;
-    border: 1px solid lightgrey;
+    border: 1px solid rgb(187, 187, 187);
     margin-left: 10px;
     padding: 10px;
     font-size: 1.2em;
@@ -110,10 +111,6 @@ textarea {
     border: none;
     font-size: 1em;
     cursor: pointer;
-}
-
-#incomplete-warning{
-    color: magenta;
 }
 
 :disabled{

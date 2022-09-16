@@ -1,8 +1,8 @@
 <template>
 <div class="filter-nav">
-    <button class="filter"  @click="applyFilterViewAll">VIEW ALL</button>
-    <button class="filter" @click="applyFilterCompleted">COMPLETED</button>
-    <button class="filter" @click="applyFilterOngoing">ONGOING</button>
+    <button class="filter" :class="{active: activeBtn === 'btn1'}" @click="filterBySetValue('all'), setActiveBtnValue('btn1')">VIEW ALL</button>
+    <button class="filter" :class="{active: activeBtn === 'btn2'}" @click="filterBySetValue('completed'), setActiveBtnValue('btn2')">COMPLETED</button>
+    <button class="filter" :class="{active: activeBtn === 'btn3'}" @click="filterBySetValue('ongoing'), setActiveBtnValue('btn3')">ONGOING</button>
 </div>
 
 <div v-if="projects.length === 0" class="project-box">
@@ -13,22 +13,20 @@
         </div>
     </router-link>
 </div>
-    <ul>
-        <li v-for="(element,index) in filteredProjects" v-bind:key="index" class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : !element.completed}">
-            <span class="project-title">{{index}} {{element.title}}</span>
-            <span class="icons">
-                <!-- delete icon  -->
-                <i class="fa-solid fa-trash" :key="index" :id="index" @click="deleteProject(index)"></i>
-                <!-- edit icon  -->
-                <router-link :to="{name:'AddProject', params: {id:index}}"> <i class="fa-solid fa-pencil"></i></router-link>
-                <!-- completed icon  -->
-                <i class="fa-solid fa-check greenHover" @click="completedProject(index)" :class="{'green-color': element.completed}"></i>
-            </span>
-            <p class="project-detail" :key="index" v-if="showDetailsIndex === index">{{element.detail}}</p>
-            <!-- </div> -->
-        </li>
-    </ul>
-
+<ul>
+    <li v-for="(element,index) in filteredProjects" v-bind:key="index" class="project-box" @click.prevent.self="showDetails(index)" :class="{'green-border-left':element.completed, 'red-border-left' : !element.completed}">
+        <span class="project-title">{{element.title}}</span>
+        <span class="icons">
+            <!-- delete icon  -->
+            <i class="fa-solid fa-trash" :key="index" :id="index" @click="deleteProject(index)"></i>
+            <!-- edit icon  -->
+            <router-link :to="{name:'AddProject', params: {id:index}}"> <i class="fa-solid fa-pencil"></i></router-link>
+            <!-- completed icon  -->
+            <i class="fa-solid fa-check greenHover" @click="completedProject(index)" :class="{'green-color': element.completed}"></i>
+        </span>
+        <p class="project-detail" :key="index" v-if="showDetailsIndex === index">{{element.detail}}</p>
+    </li>
+</ul>
 </template>
 
 <script>
@@ -37,42 +35,26 @@ export default {
     data() {
         return {
             projects: [],
-            showDetailsIndex: "",
-            filter: {
-                viewAll: true,
-                completed: false,
-                ongoing:false,
-            }
+            showDetailsIndex: null,
+            filterBy: 'all',
+            activeBtn: 'btn1'
         }
     },
     methods: {
-        applyFilterViewAll() {
-            this.filter.completed = false;
-            this.filter.viewAll = true;
-            this.filter.ongoing = false;
+        filterBySetValue(value) {
+            this.filterBy = value;
         },
-        applyFilterCompleted() {
-            this.filter.completed = true;
-            this.filter.viewAll = false;
-            this.filter.ongoing =  false
-        },
-        applyFilterOngoing() {
-            this.filter.completed = false;
-            this.filter.viewAll = false;
-            this.filter.ongoing = true;
+
+        setActiveBtnValue(value) {
+            this.activeBtn = value;
         },
 
         showDetails(index) {
-            console.log(index);
-                if (!this.showDetailsIndex) {
-                    if(this.showDetailsIndex === 0){
-                        this.showDetailsIndex = false;
-                    }
-                    this.showDetailsIndex = index;
-            }else {
-                this.showDetailsIndex = false;
+            if (this.showDetailsIndex == index) {
+                this.showDetailsIndex = null;
+            } else {
+                this.showDetailsIndex = index;
             }
-            console.log("index"+ this.showDetailsIndex);
         },
 
         deleteProject(index) {
@@ -88,10 +70,8 @@ export default {
         completedProject(index) {
             if (this.projects[index].completed === false) {
                 this.projects[index].completed = true;
-                this.projects[index].ongoing = false;
             } else {
                 this.projects[index].completed = false;
-                this.projects[index].ongoing = true;
             }
             localStorage.setItem("projects", JSON.stringify(this.projects));
         }
@@ -102,16 +82,15 @@ export default {
     },
     computed: {
         filteredProjects() {
-            if(this.filter.completed){
+            console.log(this.filterBy);
+            if (this.filterBy == 'completed') {
                 return this.projects.filter(project => project.completed)
             }
-            if(this.filter.ongoing){
+            if (this.filterBy == 'ongoing') {
                 return this.projects.filter(project => !project.completed)
             }
-            else{
-               return this.projects.filter(project => project)           
-           }
-        }
+            return this.projects;
+        },
     }
 }
 </script>
@@ -125,14 +104,14 @@ export default {
     text-decoration: none;
     font-size: .95em;
     font-weight: 600;
-    margin: 10px;
+    padding: 10px;
     background-color: transparent;
     border: none;
     color: white;
 }
 
 .filter:hover {
-    color: lightgray;
+    background-color: rgb(56, 117, 167);
 }
 
 .project-box {
@@ -185,5 +164,9 @@ i.green-color {
 
 .red-border-left {
     border-left: 6px solid salmon;
+}
+
+.active {
+    border-bottom: 2px solid white;
 }
 </style>
